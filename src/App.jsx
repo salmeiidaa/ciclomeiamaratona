@@ -301,7 +301,7 @@ const TrainingApp = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 pb-20">
       <div className="max-w-2xl mx-auto">
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold mb-2">🏃‍♀️ Meia Maratona 2025</h1>
+          <h1 className="text-3xl font-bold mb-2">🏃‍♀️ Meia Maratona 2026</h1>
           <p className="text-slate-400">Jan-Set | Huawei Watch Fit 3</p>
         </div>
 
