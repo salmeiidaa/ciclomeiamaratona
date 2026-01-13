@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Check, ChevronDown, ChevronRight, Calendar, Dumbbell, Footprints, X, Upload, BarChart3, Home } from 'lucide-react';
 
-// Sistema de storage simulado (substitui window.storage)
 const storage = {
   get: (key) => {
     try {
@@ -73,35 +72,14 @@ const TrainingApp = () => {
   const workoutTemplates = {
     0: {
       corrida: [
-        { 
-          day: "Segunda", type: "Corrida Confortável", details: "5-6 km", 
-          pace: "6:30-7:00 min/km", zone: "Zona 2 - Conversação fácil", location: "Rua",
-          indoorOption: { pace: "6:30-7:00 min/km", incline: "1%", details: "40-45min na esteira" }
-        },
-        { 
-          day: "Quarta", type: "Intervalado", details: "Aquecimento 10min + 8x400m + Volta calma 10min", 
-          pace: "400m: 5:30-5:45 min/km | Recuperação: caminhada 1min", zone: "Zona 4 - Intenso", location: "Rua/Pista",
-          indoorOption: { pace: "5:30-5:45 min/km nos tiros", incline: "2%", details: "Aquec 10min + 8x(2min rápido + 1min caminhada) + Volta calma 10min" }
-        },
-        { 
-          day: "Sábado", type: "Long Run", details: "8-10 km", 
-          pace: "6:45-7:15 min/km", zone: "Zona 2 - Conversação fácil", location: "Rua",
-          indoorOption: { pace: "6:45-7:15 min/km", incline: "1-2%", details: "60-75min na esteira (varie inclinação a cada 10min)" }
-        }
+        { day: "Segunda", type: "Corrida Confortável", details: "5-6 km", pace: "6:30-7:00 min/km", zone: "Zona 2 - Conversação fácil", location: "Rua", indoorOption: { pace: "6:30-7:00 min/km", incline: "1%", details: "40-45min na esteira" }},
+        { day: "Quarta", type: "Intervalado", details: "Aquecimento 10min + 8x400m + Volta calma 10min", pace: "400m: 5:30-5:45 min/km | Recuperação: caminhada 1min", zone: "Zona 4 - Intenso", location: "Rua/Pista", indoorOption: { pace: "5:30-5:45 min/km nos tiros", incline: "2%", details: "Aquec 10min + 8x(2min rápido + 1min caminhada) + Volta calma 10min" }},
+        { day: "Sábado", type: "Long Run", details: "8-10 km", pace: "6:45-7:15 min/km", zone: "Zona 2 - Conversação fácil", location: "Rua", indoorOption: { pace: "6:45-7:15 min/km", incline: "1-2%", details: "60-75min na esteira (varie inclinação a cada 10min)" }}
       ],
       musculacao: [
-        {
-          day: "Terça", name: "Treino A - Quadríceps e Posterior",
-          exercises: ["Agachamento livre: 4x10-12", "Leg press 45°: 3x12-15", "Cadeira extensora: 3x12-15", "Levantamento terra: 4x8-10", "Cadeira flexora: 3x12-15", "Stiff: 3x10-12", "Panturrilha em pé: 4x15-20"]
-        },
-        {
-          day: "Quinta", name: "Treino B - Puxar e Empurrar",
-          exercises: ["Supino reto: 4x10-12", "Supino inclinado: 3x10-12", "Crucifixo: 3x12-15", "Remada curvada: 4x10-12", "Puxada frente: 4x10-12", "Remada máquina: 3x12-15", "Desenvolvimento: 3x10-12"]
-        },
-        {
-          day: "Domingo", name: "Treino C - Glúteos e Core",
-          exercises: ["Hip thrust: 4x12-15", "Agachamento sumo: 3x12-15", "Afundo búlgaro: 3x10-12 cada perna", "Cadeira abdutora: 3x15-20", "Elevação pélvica: 3x15-20", "Prancha: 4x45-60seg", "Abdominal canivete: 3x15-20", "Prancha lateral: 3x30-45seg cada lado"]
-        }
+        { day: "Terça", name: "Treino A - Quadríceps e Posterior", exercises: ["Agachamento livre: 4x10-12", "Leg press 45°: 3x12-15", "Cadeira extensora: 3x12-15", "Levantamento terra: 4x8-10", "Cadeira flexora: 3x12-15", "Stiff: 3x10-12", "Panturrilha em pé: 4x15-20"]},
+        { day: "Quinta", name: "Treino B - Puxar e Empurrar", exercises: ["Supino reto: 4x10-12", "Supino inclinado: 3x10-12", "Crucifixo: 3x12-15", "Remada curvada: 4x10-12", "Puxada frente: 4x10-12", "Remada máquina: 3x12-15", "Desenvolvimento: 3x10-12"]},
+        { day: "Domingo", name: "Treino C - Glúteos e Core", exercises: ["Hip thrust: 4x12-15", "Agachamento sumo: 3x12-15", "Afundo búlgaro: 3x10-12 cada perna", "Cadeira abdutora: 3x15-20", "Elevação pélvica: 3x15-20", "Prancha: 4x45-60seg", "Abdominal canivete: 3x15-20", "Prancha lateral: 3x30-45seg cada lado"]}
       ]
     },
     1: {
@@ -399,4 +377,102 @@ const TrainingApp = () => {
                                     <div className="text-purple-300 font-semibold flex items-center gap-1">
                                       <Home className="w-3 h-3" /> OPÇÃO INDOOR (Esteira)
                                     </div>
-                                    <div className="text-yellow
+                                    <div className="text-yellow-400">⏱️ Pace: {workout.indoorOption.pace}</div>
+                                    <div className="text-orange-400">📐 Inclinação: {workout.indoorOption.incline}</div>
+                                    <div className="text-slate-300">📝 {workout.indoorOption.details}</div>
+                                  </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                  <button onClick={() => toggleWorkout(key)} className={`flex-1 py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${isCompleted ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}>
+                                    {isCompleted ? (<><X className="w-4 h-4" /> Desmarcar</>) : (<><Check className="w-4 h-4" /> Marcar Feito</>)}
+                                  </button>
+                                  
+                                  <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded-lg flex items-center gap-2 transition">
+                                    <Upload className="w-4 h-4" />
+                                    <input type="file" accept=".csv,.gpx,.tcx,.fit,.txt" onChange={(e) => handleFileUpload(e, key)} className="hidden" />
+                                    Dados
+                                  </label>
+                                </div>
+                                
+                                {workoutData[key] && (
+                                  <div className="mt-2 text-xs text-green-400 flex items-center gap-1">
+                                    <Check className="w-3 h-3" /> Dados importados: {workoutData[key].fileName}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <button onClick={() => setExpandedDay(expandedDay === `${weekNum}-musculacao` ? null : `${weekNum}-musculacao`)} className="w-full flex items-center gap-2 mb-2 text-orange-400 font-semibold">
+                        <Dumbbell className="w-4 h-4" /> Musculação
+                        {expandedDay === `${weekNum}-musculacao` ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      </button>
+                      
+                      {expandedDay === `${weekNum}-musculacao` && (
+                        <div className="space-y-2 ml-6">
+                          {workoutTemplates[currentPhase].musculacao.map((workout, idx) => {
+                            const key = `${currentPhase}-${weekNum}-musculacao-${workout.day}`;
+                            const isCompleted = completedWorkouts[key];
+                            const exCompleted = getExerciseProgress(key, workout.exercises.length);
+                            
+                            return (
+                              <div key={idx} className={`p-3 rounded-lg border-2 transition ${isCompleted ? 'bg-orange-900/30 border-orange-500' : 'bg-slate-700 border-slate-600'}`}>
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex-1">
+                                    <div className="font-semibold text-sm">{workout.day}</div>
+                                    <div className="text-xs text-orange-300 font-semibold mt-1">{workout.name}</div>
+                                    <div className="text-xs text-slate-400 mt-1">{exCompleted}/{workout.exercises.length} exercícios ✓</div>
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-slate-900/50 p-2 rounded text-xs space-y-2 mb-3">
+                                  {workout.exercises.map((ex, i) => {
+                                    const exKey = `${key}-ex-${i}`;
+                                    const exDone = completedExercises[exKey];
+                                    return (
+                                      <div key={i} onClick={() => toggleExercise(key, i)} className={`p-2 rounded cursor-pointer transition flex items-center gap-2 ${exDone ? 'bg-orange-900/40 text-orange-200' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>
+                                        <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${exDone ? 'border-orange-400 bg-orange-400' : 'border-slate-500'}`}>
+                                          {exDone && <Check className="w-3 h-3 text-white" />}
+                                        </div>
+                                        <span className={exDone ? 'line-through' : ''}>{ex}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+
+                                <button onClick={() => toggleWorkout(key)} className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${isCompleted ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'}`}>
+                                  {isCompleted ? (<><X className="w-4 h-4" /> Desmarcar Treino</>) : (<><Check className="w-4 h-4" /> Marcar Treino Completo</>)}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-6 p-4 bg-slate-800 rounded-lg text-sm text-slate-300">
+          <div className="font-bold mb-2">💡 Dicas:</div>
+          <ul className="space-y-1 text-xs">
+            <li>• <span className="text-purple-400">Indoor:</span> Clique em "Ver opção indoor" para treino na esteira</li>
+            <li>• <span className="text-green-400">Exercícios:</span> Clique em cada exercício para marcar ✓</li>
+            <li>• <span className="text-blue-400">Dados:</span> Importe arquivos do Huawei (.csv, .gpx, .tcx, .fit)</li>
+            <li>• Configure pace e zonas FC no Watch Fit 3 antes do treino</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TrainingApp;
