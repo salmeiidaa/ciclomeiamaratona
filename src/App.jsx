@@ -10,34 +10,48 @@ const TrainingApp = () => {
   const [currentPhase, setCurrentPhase] = useState(-1);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [indoorMode, setIndoorMode] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Carregar dados ao iniciar
   useEffect(() => {
     const loadData = async () => {
       try {
-        const saved = await window.storage.get('training-progress');
-        if (saved) {
+        const saved = await window.storage.get('training-progress', false);
+        if (saved && saved.value) {
           const data = JSON.parse(saved.value);
+          console.log('Dados carregados:', data);
           setCompletedWorkouts(data.completed || {});
           setCompletedExercises(data.exercises || {});
           setWorkoutData(data.workoutData || {});
           setCurrentPhase(data.phase !== undefined ? data.phase : -1);
         }
       } catch (error) {
-        console.log('Primeira vez usando o app');
+        console.log('Primeira vez usando o app ou erro ao carregar:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
   }, []);
 
+  // Salvar dados automaticamente quando houver mudanças
+  useEffect(() => {
+    if (!isLoading) {
+      saveData(completedWorkouts, completedExercises, workoutData, currentPhase);
+    }
+  }, [completedWorkouts, completedExercises, workoutData, currentPhase, isLoading]);
+
   const saveData = async (completed, exercises, data, phase) => {
     try {
-      await window.storage.set('training-progress', JSON.stringify({
+      const dataToSave = {
         completed,
         exercises,
         workoutData: data,
         phase,
         lastUpdate: new Date().toISOString()
-      }));
+      };
+      console.log('Salvando dados:', dataToSave);
+      await window.storage.set('training-progress', JSON.stringify(dataToSave), false);
       console.log('Dados salvos com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar:', error);
@@ -141,7 +155,6 @@ const TrainingApp = () => {
         }
       ]
     },
-    // ... mantenha as outras fases iguais
     0: {
       corrida: [
         { day: "Segunda", type: "Corrida Confortável", details: "5-6 km", pace: "6:30-7:00 min/km", zone: "Zona 2 - Conversação fácil", location: "Rua", indoorOption: { pace: "6:30-7:00 min/km", incline: "1%", details: "40-45min na esteira" }},
@@ -194,30 +207,34 @@ const TrainingApp = () => {
   };
 
   const toggleWorkout = (key) => {
-    const newCompleted = { ...completedWorkouts, [key]: !completedWorkouts[key] };
-    setCompletedWorkouts(newCompleted);
-    saveData(newCompleted, completedExercises, workoutData, currentPhase);
+    setCompletedWorkouts(prev => {
+      const newState = { ...prev, [key]: !prev[key] };
+      console.log('Toggle workout:', key, 'Novo estado:', newState[key]);
+      return newState;
+    });
   };
 
   const toggleExercise = (workoutKey, exerciseIndex) => {
     const exerciseKey = `${workoutKey}-ex-${exerciseIndex}`;
-    const newExercises = { ...completedExercises, [exerciseKey]: !completedExercises[exerciseKey] };
-    setCompletedExercises(newExercises);
-    saveData(completedWorkouts, newExercises, workoutData, currentPhase);
+    setCompletedExercises(prev => {
+      const newState = { ...prev, [exerciseKey]: !prev[exerciseKey] };
+      console.log('Toggle exercise:', exerciseKey, 'Novo estado:', newState[exerciseKey]);
+      return newState;
+    });
   };
 
   const handleFileUpload = async (event, workoutKey) => {
     const file = event.target.files[0];
     if (!file) return;
     
-    try {
-      const newData = { ...workoutData, [workoutKey]: { fileName: file.name, uploadDate: new Date().toISOString() }};
-      setWorkoutData(newData);
-      saveData(completedWorkouts, completedExercises, newData, currentPhase);
-      alert('Dados importados! ✓');
-    } catch (error) {
-      alert('Erro ao importar arquivo');
-    }
+    setWorkoutData(prev => ({
+      ...prev,
+      [workoutKey]: { 
+        fileName: file.name, 
+        uploadDate: new Date().toISOString() 
+      }
+    }));
+    alert('Dados importados! ✓');
   };
 
   const getExerciseProgress = (workoutKey, totalExercises) => {
@@ -230,7 +247,6 @@ const TrainingApp = () => {
 
   const changePhase = (phaseIndex) => {
     setCurrentPhase(phaseIndex);
-    saveData(completedWorkouts, completedExercises, workoutData, phaseIndex);
     setExpandedWeek(null);
     setExpandedDay(null);
   };
@@ -240,8 +256,12 @@ const TrainingApp = () => {
     const totalWorkouts = workouts.corrida.length + workouts.musculacao.length;
     let completed = 0;
     
-    workouts.corrida.forEach(w => { if (completedWorkouts[`${currentPhase}-${weekNum}-corrida-${w.day}`]) completed++; });
-    workouts.musculacao.forEach(w => { if (completedWorkouts[`${currentPhase}-${weekNum}-musculacao-${w.day}`]) completed++; });
+    workouts.corrida.forEach(w => { 
+      if (completedWorkouts[`${currentPhase}-${weekNum}-corrida-${w.day}`]) completed++; 
+    });
+    workouts.musculacao.forEach(w => { 
+      if (completedWorkouts[`${currentPhase}-${weekNum}-musculacao-${w.day}`]) completed++; 
+    });
     
     return Math.round((completed / totalWorkouts) * 100);
   };
@@ -278,10 +298,20 @@ const TrainingApp = () => {
     setIndoorMode(prev => ({...prev, [key]: !prev[key]}));
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl mb-2">🏃‍♀️</div>
+          <div className="text-slate-400">Carregando...</div>
+        </div>
+      </div>
+    );
+  }
+
   if (showAnalysis) {
     const analysis = getAnalysisData();
     const completionRate = analysis.totalWorkouts > 0 ? Math.round((analysis.completedWorkouts / analysis.totalWorkouts) * 100) : 0;
-    const exerciseRate = analysis.totalExercises > 0 ? Math.round((analysis.completedEx / analysis.totalExercises) * 100) : 0;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4">
@@ -299,6 +329,14 @@ const TrainingApp = () => {
               <div className="bg-slate-700 p-4 rounded-lg">
                 <div className="text-3xl font-bold text-blue-400">{analysis.completedWorkouts}</div>
                 <div className="text-sm text-slate-300">Treinos</div>
+              </div>
+              <div className="bg-slate-700 p-4 rounded-lg">
+                <div className="text-3xl font-bold text-green-400">{analysis.corridaCompleted}</div>
+                <div className="text-sm text-slate-300">Corridas</div>
+              </div>
+              <div className="bg-slate-700 p-4 rounded-lg">
+                <div className="text-3xl font-bold text-orange-400">{analysis.musculacaoCompleted}</div>
+                <div className="text-sm text-slate-300">Musculação</div>
               </div>
             </div>
           </div>
