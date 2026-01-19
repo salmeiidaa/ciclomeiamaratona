@@ -38,6 +38,7 @@ const TrainingApp = () => {
         phase,
         lastUpdate: new Date().toISOString()
       }));
+      console.log('Dados salvos com sucesso!');
     } catch (error) {
       console.error('Erro ao salvar:', error);
     }
@@ -54,16 +55,14 @@ const TrainingApp = () => {
   const workoutTemplates = {
     '-1': {
       corrida: [
-        { day: "16/Jan (Qui)", type: "Corrida Leve", details: "4-5 km", pace: "7:00-7:30 min/km", zone: "Zona 2", location: "Rua", indoorOption: { pace: "7:00-7:30 min/km", incline: "1%", details: "35-40min na esteira" }},
-        { day: "18/Jan (Sáb)", type: "Corrida Moderada", details: "6-7 km", pace: "6:30-7:00 min/km", zone: "Zona 2-3", location: "Rua", indoorOption: { pace: "6:30-7:00 min/km", incline: "1%", details: "45-50min na esteira" }},
-        { day: "21/Jan (Ter)", type: "Corrida Regenerativa", details: "5 km", pace: "7:00-7:30 min/km", zone: "Zona 1-2", location: "Rua", indoorOption: { pace: "7:00-7:30 min/km", incline: "0-1%", details: "35-40min leve" }},
+        { day: "20/Jan (Ter)", type: "Corrida Leve", details: "4-5 km", pace: "7:00-7:30 min/km", zone: "Zona 2", location: "Rua", indoorOption: { pace: "7:00-7:30 min/km", incline: "1%", details: "35-40min na esteira" }},
         { day: "23/Jan (Qui)", type: "Corrida Confortável", details: "5-6 km", pace: "6:45-7:15 min/km", zone: "Zona 2", location: "Rua", indoorOption: { pace: "6:45-7:15 min/km", incline: "1%", details: "40-45min" }},
         { day: "25/Jan (Sáb)", type: "Corrida Progressiva", details: "7-8 km", pace: "Início 7:00 | Final 6:15 min/km", zone: "Zona 2-3", location: "Rua", indoorOption: { pace: "Início 7:00 | Final 6:15", incline: "1-2%", details: "55-65min (acelerar últimos 20min)" }},
         { day: "28/Jan (Ter)", type: "Corrida Leve", details: "4-5 km", pace: "7:00-7:30 min/km", zone: "Zona 2", location: "Rua", indoorOption: { pace: "7:00-7:30 min/km", incline: "1%", details: "30-35min relaxado" }}
       ],
       musculacao: [
         {
-          day: "17/Jan (Sex)",
+          day: "16/Jan (Sex)",
           name: "Treino A - Inferior (Peso Corporal + Mini Band)",
           exercises: [
             { name: "Agachamento livre: 3x15", video: "https://www.youtube.com/watch?v=aclHkVaku9U" },
@@ -75,7 +74,7 @@ const TrainingApp = () => {
           ]
         },
         {
-          day: "20/Jan (Seg)",
+          day: "18/Jan (Sáb)",
           name: "Treino B - Superior (Peso Corporal)",
           exercises: [
             { name: "Flexão de braço: 3x máximo", video: "https://www.youtube.com/watch?v=IODxDxX7oi4" },
@@ -87,7 +86,7 @@ const TrainingApp = () => {
           ]
         },
         {
-          day: "22/Jan (Qua)",
+          day: "21/Jan (Ter)",
           name: "Treino C - Glúteos e Core",
           exercises: [
             { name: "Elevação de quadril com uma perna: 3x12 cada", video: "https://www.youtube.com/watch?v=AVAXhy6pl7o" },
@@ -142,6 +141,7 @@ const TrainingApp = () => {
         }
       ]
     },
+    // ... mantenha as outras fases iguais
     0: {
       corrida: [
         { day: "Segunda", type: "Corrida Confortável", details: "5-6 km", pace: "6:30-7:00 min/km", zone: "Zona 2 - Conversação fácil", location: "Rua", indoorOption: { pace: "6:30-7:00 min/km", incline: "1%", details: "40-45min na esteira" }},
@@ -194,16 +194,14 @@ const TrainingApp = () => {
   };
 
   const toggleWorkout = (key) => {
-    const newCompleted = { ...completedWorkouts };
-    newCompleted[key] = !newCompleted[key];
+    const newCompleted = { ...completedWorkouts, [key]: !completedWorkouts[key] };
     setCompletedWorkouts(newCompleted);
     saveData(newCompleted, completedExercises, workoutData, currentPhase);
   };
 
   const toggleExercise = (workoutKey, exerciseIndex) => {
     const exerciseKey = `${workoutKey}-ex-${exerciseIndex}`;
-    const newExercises = { ...completedExercises };
-    newExercises[exerciseKey] = !newExercises[exerciseKey];
+    const newExercises = { ...completedExercises, [exerciseKey]: !completedExercises[exerciseKey] };
     setCompletedExercises(newExercises);
     saveData(completedWorkouts, newExercises, workoutData, currentPhase);
   };
@@ -211,10 +209,9 @@ const TrainingApp = () => {
   const handleFileUpload = async (event, workoutKey) => {
     const file = event.target.files[0];
     if (!file) return;
+    
     try {
-      const content = await window.fs.readFile(file.name, { encoding: 'utf8' });
-      const newData = { ...workoutData };
-      newData[workoutKey] = { fileName: file.name, uploadDate: new Date().toISOString(), content: content.substring(0, 1000) };
+      const newData = { ...workoutData, [workoutKey]: { fileName: file.name, uploadDate: new Date().toISOString() }};
       setWorkoutData(newData);
       saveData(completedWorkouts, completedExercises, newData, currentPhase);
       alert('Dados importados! ✓');
@@ -242,13 +239,24 @@ const TrainingApp = () => {
     const workouts = workoutTemplates[currentPhase];
     const totalWorkouts = workouts.corrida.length + workouts.musculacao.length;
     let completed = 0;
+    
     workouts.corrida.forEach(w => { if (completedWorkouts[`${currentPhase}-${weekNum}-corrida-${w.day}`]) completed++; });
     workouts.musculacao.forEach(w => { if (completedWorkouts[`${currentPhase}-${weekNum}-musculacao-${w.day}`]) completed++; });
+    
     return Math.round((completed / totalWorkouts) * 100);
   };
 
   const getAnalysisData = () => {
-    const analysis = { totalWorkouts: 0, completedWorkouts: 0, corridaCompleted: 0, musculacaoCompleted: 0, totalExercises: 0, completedEx: 0, uploadsCount: Object.keys(workoutData).length };
+    const analysis = { 
+      totalWorkouts: 0, 
+      completedWorkouts: 0, 
+      corridaCompleted: 0, 
+      musculacaoCompleted: 0, 
+      totalExercises: 0, 
+      completedEx: 0, 
+      uploadsCount: Object.keys(workoutData).length 
+    };
+    
     Object.keys(completedWorkouts).forEach(key => {
       analysis.totalWorkouts++;
       if (completedWorkouts[key]) {
@@ -257,10 +265,12 @@ const TrainingApp = () => {
         if (key.includes('musculacao')) analysis.musculacaoCompleted++;
       }
     });
+    
     Object.keys(completedExercises).forEach(key => {
       analysis.totalExercises++;
       if (completedExercises[key]) analysis.completedEx++;
     });
+    
     return analysis;
   };
 
@@ -311,7 +321,11 @@ const TrainingApp = () => {
 
         <div className="mb-6 grid grid-cols-2 gap-2">
           {phases.map((phase, idx) => (
-            <button key={idx} onClick={() => changePhase(idx - 1)} className={`p-3 rounded-lg transition ${currentPhase === idx - 1 ? phase.color + ' shadow-lg' : 'bg-slate-700 hover:bg-slate-600'}`}>
+            <button 
+              key={idx} 
+              onClick={() => changePhase(idx - 1)} 
+              className={`p-3 rounded-lg transition ${currentPhase === idx - 1 ? phase.color + ' shadow-lg' : 'bg-slate-700 hover:bg-slate-600'}`}
+            >
               <div className="font-bold text-sm">{phase.name}</div>
               <div className="text-xs opacity-75">{phase.period}</div>
             </button>
@@ -325,7 +339,10 @@ const TrainingApp = () => {
             
             return (
               <div key={weekNum} className="bg-slate-800 rounded-lg overflow-hidden">
-                <button onClick={() => setExpandedWeek(expandedWeek === weekNum ? null : weekNum)} className="w-full p-4 flex items-center justify-between hover:bg-slate-700 transition">
+                <button 
+                  onClick={() => setExpandedWeek(expandedWeek === weekNum ? null : weekNum)} 
+                  className="w-full p-4 flex items-center justify-between hover:bg-slate-700 transition"
+                >
                   <div className="flex items-center gap-3">
                     <Calendar className="w-5 h-5 text-blue-400" />
                     <div className="text-left">
@@ -339,7 +356,10 @@ const TrainingApp = () => {
                 {expandedWeek === weekNum && (
                   <div className="p-4 pt-0 space-y-3">
                     <div>
-                      <button onClick={() => setExpandedDay(expandedDay === `${weekNum}-corrida` ? null : `${weekNum}-corrida`)} className="w-full flex items-center gap-2 mb-2 text-green-400 font-semibold">
+                      <button 
+                        onClick={() => setExpandedDay(expandedDay === `${weekNum}-corrida` ? null : `${weekNum}-corrida`)} 
+                        className="w-full flex items-center gap-2 mb-2 text-green-400 font-semibold"
+                      >
                         <Footprints className="w-4 h-4" /> Corrida
                         {expandedDay === `${weekNum}-corrida` ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </button>
@@ -382,7 +402,10 @@ const TrainingApp = () => {
                                 )}
 
                                 <div className="flex gap-2">
-                                  <button onClick={() => toggleWorkout(key)} className={`flex-1 py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${isCompleted ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}>
+                                  <button 
+                                    onClick={() => toggleWorkout(key)} 
+                                    className={`flex-1 py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${isCompleted ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                                  >
                                     {isCompleted ? (<><X className="w-4 h-4" /> Desmarcar</>) : (<><Check className="w-4 h-4" /> Feito</>)}
                                   </button>
                                   
@@ -405,7 +428,10 @@ const TrainingApp = () => {
                     </div>
 
                     <div>
-                      <button onClick={() => setExpandedDay(expandedDay === `${weekNum}-musculacao` ? null : `${weekNum}-musculacao`)} className="w-full flex items-center gap-2 mb-2 text-orange-400 font-semibold">
+                      <button 
+                        onClick={() => setExpandedDay(expandedDay === `${weekNum}-musculacao` ? null : `${weekNum}-musculacao`)} 
+                        className="w-full flex items-center gap-2 mb-2 text-orange-400 font-semibold"
+                      >
                         <Dumbbell className="w-4 h-4" /> Musculação
                         {expandedDay === `${weekNum}-musculacao` ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </button>
@@ -438,7 +464,10 @@ const TrainingApp = () => {
                                     return (
                                       <div key={i} className="space-y-1">
                                         <div className={`p-2 rounded transition flex items-center gap-2 ${exDone ? 'bg-orange-900/40 text-orange-200' : 'bg-slate-800 text-slate-300'}`}>
-                                          <div onClick={() => toggleExercise(key, i)} className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 cursor-pointer ${exDone ? 'border-orange-400 bg-orange-400' : 'border-slate-500'}`}>
+                                          <div 
+                                            onClick={() => toggleExercise(key, i)} 
+                                            className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 cursor-pointer ${exDone ? 'border-orange-400 bg-orange-400' : 'border-slate-500'}`}
+                                          >
                                             {exDone && <Check className="w-3 h-3 text-white" />}
                                           </div>
                                           <span className={`flex-1 ${exDone ? 'line-through' : ''}`}>{exerciseName}</span>
@@ -458,7 +487,10 @@ const TrainingApp = () => {
                                   })}
                                 </div>
 
-                                <button onClick={() => toggleWorkout(key)} className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${isCompleted ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'}`}>
+                                <button 
+                                  onClick={() => toggleWorkout(key)} 
+                                  className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${isCompleted ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'}`}
+                                >
                                   {isCompleted ? (<><X className="w-4 h-4" /> Desmarcar</>) : (<><Check className="w-4 h-4" /> Completo</>)}
                                 </button>
                               </div>
